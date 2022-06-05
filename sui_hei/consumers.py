@@ -171,7 +171,7 @@ class GraphqlSubcriptionConsumer(SyncConsumer):
     def websocket_disconnect(self, message):
         for group in self.groups.keys():
             group_discard = async_to_sync(self.channel_layer.group_discard)
-            group_discard('django.%s' % group, self.channel_name)
+            group_discard(f'django.{group}', self.channel_name)
 
         self.send({"type": "websocket.close", "code": 1000})
         raise StopConsumer()
@@ -223,7 +223,7 @@ class GraphqlSubcriptionConsumer(SyncConsumer):
         group = self.groups.setdefault(model_name, set())
         if not len(group):
             group_add = async_to_sync(self.channel_layer.group_add)
-            group_add('django.%s' % model_name, self.channel_name)
+            group_add(f'django.{model_name}', self.channel_name)
         self.groups[model_name].add(id)
 
     def _unsubscribe(self, id):
@@ -235,7 +235,7 @@ class GraphqlSubcriptionConsumer(SyncConsumer):
             if not len(ids):
                 # no more subscriptions for this group
                 group_discard = async_to_sync(self.channel_layer.group_discard)
-                group_discard('django.%s' % group, self.channel_name)
+                group_discard(f'django.{group}', self.channel_name)
 
     def _send_result(self, id, result):
         # Don't send results if no useful data is generated
@@ -274,8 +274,7 @@ def notify_on_model_changes(model):
             'pk': instance.pk,
             'model': model_label,
         }
-        async_to_sync(channel_layer.group_send)('django.%s' % model_label,
-                                                payload)
+        async_to_sync(channel_layer.group_send)(f'django.{model_label}', payload)
 
     post_save.connect(
         receiver,

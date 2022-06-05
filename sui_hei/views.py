@@ -27,7 +27,4 @@ def remove_i18n_pattern(request, *args, **kwargs):
 
 def event(request, eventId, *args, **kwargs):
     ev = Event.objects.get(pk=eventId)
-    if ev.page_src:
-        return HttpResponse(ev.page_src)
-    else:
-        return redirect('/')
+    return HttpResponse(ev.page_src) if ev.page_src else redirect('/')

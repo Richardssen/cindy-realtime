@@ -63,7 +63,7 @@ def fillDependencies(migrates):
         last_migration += 1
 
         for i in range(1, len(migrates)):
-            if migrates[i]["dependency"] == None:
+            if migrates[i]["dependency"] is None:
                 migrates[i]["dependency"] = migrates[i - 1]["output"][:-3]
                 migrates[i]["output"] = str(last_migration + 1).zfill(
                     4) + migrates[i]["appends"]
@@ -78,8 +78,8 @@ if __name__ == "__main__":
             migration = f.read()
 
         # debug
-        print("Find dependency migration file %s" % mig["dependency"])
-        print("Adding new migration file %s...Done" % mig["output"])
+        print(f'Find dependency migration file {mig["dependency"]}')
+        print(f'Adding new migration file {mig["output"]}...Done')
 
         with open(os.path.join(MIG_PATH, mig["output"]), "w") as f:
             f.write(migration % mig["dependency"])

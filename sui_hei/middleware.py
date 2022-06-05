@@ -11,20 +11,15 @@ referer_language_code_prefix = re.compile(r'^https?://[^/]+/([^/]+)')
 
 class GraphQLLocaleMiddleware(LocaleMiddleware):
     def process_request(self, request):
-        if request.path_info == '/graphql':
-            regex_match = referer_language_code_prefix.match(
-                request.META.get('HTTP_REFERER', ''))
-            if not regex_match:
-                lang_code = None
-            else:
-                lang_code = regex_match.group(1)
+        if request.path_info != '/graphql':
+            return super(GraphQLLocaleMiddleware, self).process_request(request)
+        regex_match = referer_language_code_prefix.match(
+            request.META.get('HTTP_REFERER', ''))
+        lang_code = regex_match.group(1) if regex_match else None
+        language = get_supported_language_variant(lang_code)
+        if not language:
+            language = 'en'
 
-            language = get_supported_language_variant(lang_code)
-            if not language:
-                language = 'en'
-
-            translation.activate(language)
-            request.LANGUAGE_CODE = translation.get_language()
-            return
-
-        return super(GraphQLLocaleMiddleware, self).process_request(request)
+        translation.activate(language)
+        request.LANGUAGE_CODE = translation.get_language()
+        return

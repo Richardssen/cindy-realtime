@@ -45,7 +45,7 @@ def resolveLimitOffset(qs, limit, offset):
 # {{{1 resolveFilter
 def resolveFilter(qs, args, filters=[], filter_fields=None):
     filters = {f: args[f] for f in filters if f in args}
-    if filter_fields == None:
+    if filter_fields is None:
         filter_fields = {}
     for filterName, className in filter_fields.items():
         filterValue = args.get(filterName)
@@ -58,7 +58,7 @@ def resolveFilter(qs, args, filters=[], filter_fields=None):
             print("resolveFilter:", e)
             return qs.none()
 
-    if len(filters) > 0:
+    if filters:
         qs = qs.filter(**filters)
 
     return qs
@@ -75,24 +75,23 @@ def resolveOrderBy(qs, order_by):
     order_by: array of strings of default django order_by statement.
               e.g. 'field' '-field'
     '''
-    if order_by:
-        field = order_by[0]
-        desc = (field[0] == '-')
-        fieldQueries = []
-        for field in order_by:
-            desc = (field[0] == '-')
-            fieldName = re.sub("^-", "", field)
-            fieldQueries.append(
-                F(fieldName).desc(nulls_last=True)
-                if desc else F(fieldName).asc(nulls_last=True))
-
-        # Fix postgresql disorder
-        if "id" not in fieldQueries and "-id" not in fieldQueries:
-            fieldQueries.append("-id")
-
-        return qs.order_by(*fieldQueries)
-    else:
+    if not order_by:
         return qs.all()
+    field = order_by[0]
+    desc = (field[0] == '-')
+    fieldQueries = []
+    for field in order_by:
+        desc = (field[0] == '-')
+        fieldName = re.sub("^-", "", field)
+        fieldQueries.append(
+            F(fieldName).desc(nulls_last=True)
+            if desc else F(fieldName).asc(nulls_last=True))
+
+    # Fix postgresql disorder
+    if "id" not in fieldQueries and "-id" not in fieldQueries:
+        fieldQueries.append("-id")
+
+    return qs.order_by(*fieldQueries)
 
 
 # {{{1 Nodes
@@ -468,7 +467,7 @@ class WikiNode(graphene.ObjectType):
     class Meta:
         interfaces = (relay.Node, )
 
-    def get_node(cls, info):
+    def get_node(self, info):
         sui_hei_dir = os.path.split(os.path.abspath(__file__))[0]
         wikiPath = os.path.join(sui_hei_dir, "wiki", info) + ".md"
         if os.path.exists(wikiPath):
@@ -590,8 +589,7 @@ class DialogueSubscription(SubscriptionType):
     def next(cls, pk_model, info):
         pk, model_label = pk_model
         if model_label == 'sui_hei.dialogue':
-            obj = Dialogue.objects.get(id=pk)
-            return obj
+            return Dialogue.objects.get(id=pk)
 
 
 # {{{2 PuzzleShowUnionSubscription
@@ -661,7 +659,7 @@ class DirectMessageSubscription(SubscriptionType):
 
     @classmethod
     def next(cls, pk_model, info, *, receiver=None):
-        if receiver == None:
+        if receiver is None:
             return
 
         pk, model_label = pk_model
@@ -1273,16 +1271,14 @@ class UpdateCurrentAward(relay.ClientIDMutation):
         if (not user.is_authenticated):
             raise ValidationError(_("Please login!"))
 
-        userawardId = input.get('userawardId')
-
-        if not userawardId:
-            user.current_award = None
-        else:
+        if userawardId := input.get('userawardId'):
             useraward = UserAward.objects.get(id=userawardId)
             if useraward.user != user:
                 raise ValidationError(_("You are not the owner of this award"))
             user.current_award = useraward
 
+        else:
+            user.current_award = None
         user.save()
         return UpdateCurrentAward()
 

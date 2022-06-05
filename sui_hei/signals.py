@@ -22,32 +22,33 @@ logger = logging.Logger(__name__)
 
 
 def add_twitter_on_puzzle_created(sender, instance, created, **kwargs):
-    if created and ENABLE_TWITTERBOT:
-        try:
-            auth = OAuth(TOKEN, TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
-            t = Twitter(auth=auth)
+    if not created or not ENABLE_TWITTERBOT:
+        return
+    try:
+        auth = OAuth(TOKEN, TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
+        t = Twitter(auth=auth)
 
-            params = {
-                'status': TWEET_MESSAGE % {
-                    'user_nickname': _('Anonymous User') if instance.anonymous else instance.user.nickname,
-                    'title': instance.title,
-                    'id': instance.id
-                },
-            } # yapf: disable
+        params = {
+            'status': TWEET_MESSAGE % {
+                'user_nickname': _('Anonymous User') if instance.anonymous else instance.user.nickname,
+                'title': instance.title,
+                'id': instance.id
+            },
+        } # yapf: disable
 
-            if TWEET_WITH_PICTURE:
-                from imaging.puzzle_rendering import render, textify
+        if TWEET_WITH_PICTURE:
+            from imaging.puzzle_rendering import render, textify
 
-                imgpath = render(instance.title, textify(instance.content))
-                with open(imgpath, 'rb') as f:
-                    imgdata = f.read()
-                params['media[]'] = imgdata
-                t.statuses.update_with_media(**params)
-            else:
-                t.statuses.update(**params)
+            imgpath = render(instance.title, textify(instance.content))
+            with open(imgpath, 'rb') as f:
+                imgdata = f.read()
+            params['media[]'] = imgdata
+            t.statuses.update_with_media(**params)
+        else:
+            t.statuses.update(**params)
 
-        except Exception as e:
-            logger.warning("Error update twitter status: %s" % e)
+    except Exception as e:
+        logger.warning(f"Error update twitter status: {e}")
 
 
 def add_twitter_on_best_of_month_determined(puzzle_list, useraward):
@@ -86,7 +87,7 @@ def add_twitter_on_best_of_month_determined(puzzle_list, useraward):
         t.statuses.update_with_media(**params)
 
     except Exception as e:
-        logger.warning("Error update twitter status: %s" % e)
+        logger.warning(f"Error update twitter status: {e}")
 
 
 def add_twitter_on_schedule_created(sender, instance, created, **kwargs):
@@ -114,4 +115,4 @@ def add_twitter_on_schedule_created(sender, instance, created, **kwargs):
         t.statuses.update_with_media(**params)
 
     except Exception as e:
-        logger.warning("Error update twitter status: %s" % e)
+        logger.warning(f"Error update twitter status: {e}")

@@ -28,9 +28,7 @@ def _split_lines(text, stop):
         if not part:
             continue
         part = wcstr(part)
-        for i in range(0, len(part), stop):
-            output.append(part[i:i + stop])
-
+        output.extend(part[i:i + stop] for i in range(0, len(part), stop))
     return output
 
 

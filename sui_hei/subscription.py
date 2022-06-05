@@ -37,9 +37,7 @@ class Subscription(graphene.ObjectType):
             output = cls
 
         if not arguments:
-            input_class = getattr(cls, 'Arguments', None)
-
-            if input_class:
+            if input_class := getattr(cls, 'Arguments', None):
                 arguments = props(input_class)
             else:
                 arguments = {}
@@ -68,8 +66,7 @@ class Subscription(graphene.ObjectType):
 
     @classmethod
     def resolver(cls, obj, info, **kwargs):
-        subscribe = info.context.subscribe
-        if subscribe:
+        if subscribe := info.context.subscribe:
             models = cls.subscribe(info)
             if not isinstance(models, list):
                 models = [models]

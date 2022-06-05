@@ -32,14 +32,13 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, nickname, username, password=None):
-        user = self.create_user(
+        return self.create_user(
             nickname=nickname,
             username=username,
             password=password,
             is_staff=True,
             is_admin=True,
         )
-        return user
 
 
 # Create your models here.
@@ -73,7 +72,7 @@ class AwardApplication(models.Model):
         permissions = [("can_review_award_application", _("Can review award application")), ] # yapf: disable
 
     def __str__(self):
-        return "[%s]: %s" % (str(self.applier), str(self.award))
+        return f"[{str(self.applier)}]: {str(self.award)}"
 
 
 awardapplication_status_enum = {
@@ -124,7 +123,7 @@ class UserAward(models.Model):
         verbose_name = _("User-Award")
 
     def __str__(self):
-        return "[%s] owns [%s]" % (self.user.nickname, self.award)
+        return f"[{self.user.nickname}] owns [{self.award}]"
 
 
 class Puzzle(models.Model):
@@ -214,7 +213,7 @@ class Hint(models.Model):
         verbose_name = _("Hint")
 
     def __str__(self):
-        return "[%s]: %s" % (self.puzzle, str(self.content)[:50])
+        return f"[{self.puzzle}]: {str(self.content)[:50]}"
 
 
 class ChatMessage(models.Model):
@@ -246,7 +245,7 @@ class DirectMessage(models.Model):
         verbose_name = _("DirectMessage")
 
     def __str__(self):
-        return "[%s] sends a DM to [%s]" % (self.sender, self.receiver)
+        return f"[{self.sender}] sends a DM to [{self.receiver}]"
 
 
 class ChatRoom(models.Model):
@@ -317,8 +316,7 @@ class Schedule(models.Model):
         verbose_name = _("Schedule")
 
     def __str__(self):
-        return "[%s TO %s]: (%s) %s" % (self.scheduled, self.created,
-                                        self.user, str(self.content)[:50])
+        return f"[{self.scheduled} TO {self.created}]: ({self.user}) {str(self.content)[:50]}"
 
 
 class Event(models.Model):
@@ -349,4 +347,4 @@ class EventAward(models.Model):
         verbose_name = _("EventAward")
 
     def __str__(self):
-        return "%s: %s" % (self.event.title, self.award.name)
+        return f"{self.event.title}: {self.award.name}"

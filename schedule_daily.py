@@ -23,13 +23,12 @@ def clean_recent_minichat(chatroomName="lobby", recent=None):
     cr_messages = cr.chatmessage_set.order_by("id")
     count = cr_messages.count()
 
-    logger.debug("[ChatRoom:%s]: Total count: %s" % (chatroomName, count))
+    logger.debug(f"[ChatRoom:{chatroomName}]: Total count: {count}")
     if not isinstance(recent, int):
-        logger.debug("[ChatRoom:%s]: Delete all objects" % chatroomName)
+        logger.debug(f"[ChatRoom:{chatroomName}]: Delete all objects")
         cr.chatmessage_set.delete()
     else:
-        logger.debug("[ChatRoom:%s]: Leaving message count: %s" %
-                     (chatroomName, recent))
+        logger.debug(f"[ChatRoom:{chatroomName}]: Leaving message count: {recent}")
 
     if count <= recent:
         return
@@ -40,8 +39,10 @@ def clean_recent_minichat(chatroomName="lobby", recent=None):
         return
 
     to_delete = cr_messages.filter(id__lte=earliest)
-    logger.debug("[ChatRoom:%s]: Deleting %s objects" % (chatroomName,
-                                                         to_delete.count()))
+    logger.debug(
+        f"[ChatRoom:{chatroomName}]: Deleting {to_delete.count()} objects"
+    )
+
     to_delete.delete()
 
 
@@ -51,7 +52,7 @@ def clean_recent_directmessages(recent=90):
     outdated = DirectMessage.objects.filter(created__lt=recent_days_ago)
     logger.debug(
         "[DirectMessage]: Reserve messages in recent %d days" % recent)
-    logger.debug("[DirectMessage]: Deleting %s objects" % outdated.count())
+    logger.debug(f"[DirectMessage]: Deleting {outdated.count()} objects")
     outdated.delete()
 
 
